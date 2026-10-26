@@ -4,7 +4,8 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 
 # Импортируем ВСЕ нужные модели из database (включая Pizzeria)
-from database import init_db, SessionLocal, User, Pizza, Pizzeria
+from database import init_db, SessionLocal, User, Pizza, Pizzeria, Order
+
 
 app = FastAPI()
 
@@ -187,3 +188,27 @@ def update_prices(price_margarita: int = Form(...), price_pepperoni: int = Form(
             <a href="/" style="color: #ff5c00;">Перейти на главную и проверить</a>
         </body>
     """)
+
+# МАРШРУТ ДЛЯ СОЗДАНИЯ ЗАКАЗА ИЗ КОРЗИНЫ
+@app.post("/api/order")
+def create_order(
+    items: str = Form(...), 
+    total_price: int = Form(...), 
+    delivery_type: str = Form(...), 
+    address: str = Form("") , 
+    db: Session = Depends(get_db)
+):
+    # Создаем новую запись заказа в базе данных
+    new_order = Order(
+        user_id=2, # Временная заглушка ID клиента для теста
+        items=items,
+        total_price=total_price,
+        delivery_type=delivery_type,
+        address=address,
+        status="Принят рестораном №1" # Стартовый статус для трекера
+    )
+    db.add(new_order)
+    db.commit() # Сохраняем в pizza.db
+    
+    return {"status": "success", "message": "Заказ успешно сохранен в базе данных!"}
+

@@ -52,3 +52,15 @@ class Pizzeria(Base):
 # Функция генерации таблиц
 def init_db():
     Base.metadata.create_all(bind=engine)
+
+# 6. ТАБЛИЦА ЗАКАЗОВ (История)
+class Order(Base):
+    __tablename__ = "orders"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer)             # ID пользователя, который сделал заказ
+    items = Column(String(500))            # Перечень пицц (например: "Маргарита, Пепперони")
+    total_price = Column(Integer)          # Итоговая стоимость
+    delivery_type = Column(String(50))     # delivery (доставка) или pickup (самовывоз)
+    address = Column(String(255), default="") # Адрес доставки
+    status = Column(String(100), default="Принят рестораном №1") # Текущий статус для трекера

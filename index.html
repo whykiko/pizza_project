@@ -93,10 +93,45 @@
         }
 
         // Заглушка для отправки заказа на Python
+                // Реальная отправка заказа на бэкенд Python
         function sendOrder() {
-            alert('Заказ успешно сформирован! Скоро мы свяжем его с базой данных.');
+            const deliveryType = document.getElementById('delivery-type').value;
+            const address = document.getElementById('delivery-address').value;
+            
+            if (deliveryType === 'delivery' && !address.trim()) {
+                alert('Пожалуйста, введите адрес доставки!');
+                return;
+            }
+
+            // Собираем названия всех пицц в одну строку через запятую
+            const itemsString = cart.map(item => item.title).join(', ');
+            // Считаем чистую сумму (убираем значок ₽ и пробелы)
+            const total = parseInt(document.getElementById('total-price').innerText);
+
+            // Создаем объект данных формы для отправки
+            const formData = new FormData();
+            formData.append('items', itemsString);
+            formData.append('total_price', total);
+            formData.append('delivery_type', deliveryType);
+            formData.append('address', address);
+
+            // Отправляем запрос на сервер Python
+            fetch('/api/order', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('KikoПицца приняла ваш заказ! Зайдите в Личный Кабинет, чтобы отслеживать статус.');
+                    cart = []; // Очищаем корзину после успеха
+                    updateCartUI();
+                } else {
+                    alert('Что-то пошло не так, попробуйте снова.');
+                }
+            })
+            .catch(error => console.error('Ошибка:', error));
         }
     </script>
-
 </body>
 </html>
