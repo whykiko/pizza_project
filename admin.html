@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Панель администратора — KikoПицца</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <div class="logo">KikoПицца (Админ)</div>
+        <nav><a href="/" class="lk-button">Выйти на главную</a></nav>
+    </header>
+    
+    <div class="container">
+        <h2>👑 Панель администратора</h2>
+        
+        <div class="admin-grid">
+            <!-- Блок управления загруженностью ресторанов -->
+            <div class="admin-card">
+                <h3>📍 Загруженность филиалов</h3>
+                <div class="form-group">
+                    <label>Филиал Центр:</label>
+                    <select>
+                        <option value="low">Низкая (Низкий маржинальный риск)</option>
+                        <option value="medium">Средняя</option>
+                        <option value="high" selected>Высокая (Включить перенаправление заказов)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Филиал Север (Дальний):</label>
+                    <select>
+                        <option value="low" selected>Низкая (Свободен для заказов)</option>
+                        <option value="medium">Средняя</option>
+                        <option value="high">Высокая</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Блок управления курьерами -->
+            <div class="admin-card">
+                <h3>🛵 Доступные курьеры</h3>
+                <div class="form-group">
+                    <label>Авто-курьеры (в строю):</label>
+                    <input type="number" value="3" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Пешие курьеры (в строю):</label>
+                    <input type="number" value="5" min="0">
+                </div>
+            </div>
+
+            <!-- Блок управления ценами меню -->
+            <div class="admin-card">
+                <h3>💰 Управление ценами</h3>
+                <div class="form-group">
+                    <label>Цена "Маргарита" (₽):</label>
+                    <input type="number" value="450">
+                </div>
+                <div class="form-group">
+                    <label>Цена "Пепперони" (₽):</label>
+                    <input type="number" value="550">
+                </div>
+                <button class="login-btn" style="background-color: #2b2b2a;">Сохранить изменения</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
