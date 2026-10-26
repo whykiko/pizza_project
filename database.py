@@ -2,10 +2,10 @@ from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, create_engi
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# 1. Указываем, где будет лежать файл нашей базы данных
+# 1. Указываем файл базы данных
 SQLALCHEMY_DATABASE_URL = "sqlite:///./pizza.db"
 
-# 2. Создаем движок базы данных
+# 2. Создаем движок
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
 )
@@ -14,29 +14,41 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 
-# 3. ТАБЛИЦА ПОЛЬЗОВАТЕЛЕЙ (Аккаунты)
+# 3. ТАБЛИЦА ПОЛЬЗОВАТЕЛЕЙ
 class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True)
-    password = Column(String)  # Пароль
-    avatar_url = Column(
-        String, default="/static/default-avatar.png"
-    )  # Ссылка на аватарку
-    is_admin = Column(Boolean, default=False)  # Флаг: админ или нет
+    username = Column(String(100), unique=True, index=True)
+    password = Column(String(100))
+    avatar_url = Column(String(255), default="/static/default-avatar.png")
+    is_admin = Column(Boolean, default=False)
 
-# 4. ТАБЛИЦА ПИЦЦ (Меню)
+
+# 4. ТАБЛИЦА ПИЦЦ
 class Pizza(Base):
     __tablename__ = "pizzas"
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, unique=True)  # Название пиццы
-    description = Column(String)  # Описание
-    price = Column(Integer)  # Цена
-    image_url = Column(String)  # Ссылка на картинку
-    is_available = Column(Boolean, default=True)  # Есть ли в наличии
+    title = Column(String(100), unique=True)
+    description = Column(String(500))
+    price = Column(Integer)
+    image_url = Column(String(500))
+    is_available = Column(Boolean, default=True)
 
-# Создаем все таблицы в файле pizza.db автоматически при запуске
+
+# 5. ТАБЛИЦА ПИЦЦЕРИЙ (Исправленная версия с указанием лимитов String)
+class Pizzeria(Base):
+    __tablename__ = "pizzerias"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), unique=True)
+    address = Column(String(255))
+    load_status = Column(String(50), default="low")
+    auto_couriers = Column(Integer, default=3)
+    foot_couriers = Column(Integer, default=5)
+
+
+# Функция генерации таблиц
 def init_db():
     Base.metadata.create_all(bind=engine)
