@@ -148,3 +148,42 @@ def login_handle(username: str = Form(...), password: str = Form(...), db: Sessi
             </body>
         </html>
         """
+# МАРШРУТ ОБНОВЛЕНИЯ КУРЬЕРОВ ИЗ АДМИНКИ
+@app.post("/admin/update-couriers")
+def update_couriers(auto_couriers: int = Form(...), foot_couriers: int = Form(...), db: Session = Depends(get_db)):
+    # Находим в базе данных наш центральный филиал
+    branch = db.query(Pizzeria).filter(Pizzeria.name == "Филиал Центр").first()
+    if branch:
+        # Меняем старые значения курьеров на новые из формы
+        branch.auto_couriers = auto_couriers
+        branch.foot_couriers = foot_couriers
+        db.commit() # Сохраняем изменения в базе данных!
+        
+    # Возвращаем админа обратно на страницу успешного уведомления
+    return HTMLResponse("""
+        <body style="text-align: center; padding-top: 50px; font-family: sans-serif;">
+            <h2 style="color: green;">✅ Данные курьеров успешно обновлены в БД!</h2>
+            <a href="/" style="color: #ff5c00;">На главную страницу</a>
+        </body>
+    """)
+
+# МАРШРУТ ОБНОВЛЕНИЯ ЦЕН ИЗ АДМИНКИ
+@app.post("/admin/update-prices")
+def update_prices(price_margarita: int = Form(...), price_pepperoni: int = Form(...), db: Session = Depends(get_db)):
+    # Находим пиццы в базе данных по их названиям
+    margarita = db.query(Pizza).filter(Pizza.title == "Маргарита").first()
+    pepperoni = db.query(Pizza).filter(Pizza.title == "Пепперони").first()
+    
+    if margarita:
+        margarita.price = price_margarita
+    if pepperoni:
+        pepperoni.price = price_pepperoni
+        
+    db.commit() # Сохраняем новые цены в базе данных!
+    
+    return HTMLResponse("""
+        <body style="text-align: center; padding-top: 50px; font-family: sans-serif;">
+            <h2 style="color: green;">✅ Новые цены успешно сохранены в базе данных!</h2>
+            <a href="/" style="color: #ff5c00;">Перейти на главную и проверить</a>
+        </body>
+    """)
