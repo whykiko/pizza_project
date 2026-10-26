@@ -20,6 +20,12 @@ def get_db():
     finally:
         db.close()
 
+# Импортируем модель Пиццы из нашего файла базы данных
+from database import Pizza, User
+
+# Инициализируем базу данных (создает файл pizza.db при старте)
+init_db()
+
 # Автоматически создаем админа в базе данных при первом запуске, если его нет
 db = SessionLocal()
 admin_exists = db.query(User).filter(User.username == "whykiko").first()
@@ -27,14 +33,62 @@ if not admin_exists:
     new_admin = User(username="whykiko", password="whykiko_sixseven", is_admin=True)
     db.add(new_admin)
     db.commit()
+
+# Автоматически создаем стартовое меню пицц, если таблица пустая
+pizza_exists = db.query(Pizza).first()
+if not pizza_exists:
+    menu = [
+        Pizza(
+            title="Маргарита",
+            description="Классический рецепт: итальянские томаты, нежнейшая моцарелла и свежий базилик.",
+            price=450,
+            image_url="https://static.vecteezy.com/system/resources/previews/046/828/708/non_2x/fresh-classic-pizza-margarita-top-view-isolated-on-transparent-background-png.png",
+        ),
+        Pizza(
+            title="Пепперони",
+            description="Пикантная колбаска пепперони, увеличенная порция сыра моцарелла и фирменный томатный соус.",
+            price=550,
+            image_url="https://static.vecteezy.com/system/resources/previews/049/668/532/non_2x/delicious-pepperoni-pizza-with-melted-cheese-and-a-transparent-background-png.png",
+        ),
+    ]
+    db.add_all(menu)
+    db.commit()
 db.close()
 
-
+# Заменяем старую функцию home на динамическую
 @app.get("/", response_class=HTMLResponse)
-def home():
+def home(db: Session = Depends(get_db)):
+    # 1. Загружаем из базы данных все пиццы, которые есть в наличии
+    pizzas_from_db = db.query(Pizza).filter(Pizza.is_available == True).all()
+    
+    # 2. Переменная, в которую мы по цепочке склеим HTML-код для каждой пиццы
+    pizza_cards_html = ""
+    
+    # 3. Циклом проходим по каждой пицце из базы данных и генерируем её карточку
+    for pizza in pizzas_from_db:
+        pizza_cards_html += f"""
+        <div class="pizza-card">
+            <img class="pizza-img" src="{pizza.image_url}" alt="{pizza.title}">
+            <div class="pizza-info">
+                <div>
+                    <h3 class="pizza-title">{pizza.title}</h3>
+                    <p class="pizza-desc">{pizza.description}</p>
+                </div>
+                <div class="pizza-footer">
+                    <span class="price">{pizza.price} ₽</span>
+                    <button>В корзину</button>
+                </div>
+            </div>
+        </div>
+        """
+        
+    # 4. Открываем наш файл каркаса страницы
     with open("index.html", "r", encoding="utf-8") as file:
-        return file.read()
-
+        html_content = file.read()
+        
+    # 5. Заменяем техническую метку внутри файла на наш сгенерированный код карточек
+    dynamic_html = html_content.replace("<!-- ДИНАМИЧЕСКОЕ_МЕНЮ_ИЗ_БД -->", pizza_cards_html)
+    return dynamic_html
 
 @app.get("/login", response_class=HTMLResponse)
 def login_page():
