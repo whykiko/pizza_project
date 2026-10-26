@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Регистрация — KikoПицца</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <div class="logo"><a href="/" style="color: #ff5c00; text-decoration: none;">KikoПицца</a></div>
+    </header>
+    
+    <div class="login-container">
+        <h2>Создать аккаунт</h2>
+        <form action="/register" method="POST">
+            <div class="form-group">
+                <label for="username">Придумайте логин:</label>
+                <input type="text" id="username" name="username" required placeholder="Минимум 3 символа">
+            </div>
+            <div class="form-group">
+                <label for="password">Придумайте пароль:</label>
+                <input type="password" id="password" name="password" required placeholder="Надежный пароль">
+            </div>
+            <button type="submit" class="login-btn">Зарегистрироваться</button>
+        </form>
+        <p style="text-align: center; margin-top: 20px; font-size: 0.9rem;">
+            Уже есть аккаунт? <a href="/login" style="color: #ff5c00; text-decoration: none;">Войти</a>
+        </p>
+    </div>
+</body>
+</html>
