@@ -15,10 +15,88 @@
     </header>
     
     <div class="container">
+                <!-- БЛОК ИНТЕРАКТИВНОЙ КОРЗИНЫ -->
+        <div class="cart-container" id="cart-section" style="display: none;">
+            <h2>🛒 Ваш заказ</h2>
+            <div class="admin-card">
+                <div id="cart-items">
+                    <!-- Сюда JavaScript будет добавлять выбранные пиццы -->
+                </div>
+                
+                <!-- Выбор: Доставка или Самовывоз (Фундамент для умной логики) -->
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>Способ получения заказа:</label>
+                    <select id="delivery-type" onchange="toggleDeliveryAddress()">
+                        <option value="delivery">🚗 Доставка курьером</option>
+                        <option value="pickup">🏃 Самовывоз из пиццерии</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="address-group">
+                    <label>Адрес доставки:</label>
+                    <input type="text" id="delivery-address" placeholder="Введите улицу и номер дома">
+                </div>
+
+                <div class="pizza-footer" style="margin-top: 20px; border-top: 2px solid #f4f4f6; padding-top: 15px;">
+                    <div>Итого к оплате: <span class="price" id="total-price">0 ₽</span></div>
+                    <button onclick="sendOrder()">Оформить заказ</button>
+                </div>
+            </div>
+        </div>
         <h2>Меню</h2>
         <div class="pizza-container">
             <!-- ДИНАМИЧЕСКОЕ_МЕНЮ_ИЗ_БД -->
         </div>
     </div>
+        <script>
+        let cart = [];
+
+        // Функция добавления пиццы в корзину
+        function addToCart(title, price) {
+            cart.push({ title: title, price: price });
+            updateCartUI();
+        }
+
+        // Обновление внешнего вида корзины
+        function updateCartUI() {
+            const cartSection = document.getElementById('cart-section');
+            const cartItemsDiv = document.getElementById('cart-items');
+            const totalPriceSpan = document.getElementById('total-price');
+            
+            if (cart.length === 0) {
+                cartSection.style.display = 'none';
+                return;
+            }
+            
+            cartSection.style.display = 'block';
+            cartItemsDiv.innerHTML = '';
+            let total = 0;
+            
+            cart.forEach((item, index) => {
+                total += item.price;
+                cartItemsDiv.innerHTML += `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>🍕 <b>${item.title}</b></span>
+                        <span>${item.price} ₽</span>
+                    </div>
+                `;
+            });
+            
+            totalPriceSpan.innerText = total + ' ₽';
+        }
+
+        // Скрытие/показ поля адреса при самовывозе
+        function toggleDeliveryAddress() {
+            const type = document.getElementById('delivery-type').value;
+            const addressGroup = document.getElementById('address-group');
+            addressGroup.style.display = type === 'delivery' ? 'flex' : 'none';
+        }
+
+        // Заглушка для отправки заказа на Python
+        function sendOrder() {
+            alert('Заказ успешно сформирован! Скоро мы свяжем его с базой данных.');
+        }
+    </script>
+
 </body>
 </html>

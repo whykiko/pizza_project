@@ -78,7 +78,7 @@ def home(db: Session = Depends(get_db)):
                 </div>
                 <div class="pizza-footer">
                     <span class="price">{pizza.price} ₽</span>
-                    <button>В корзину</button>
+                    <button onclick="addToCart('{pizza.title}', {pizza.price})">В корзину</button>
                 </div>
             </div>
         </div>
