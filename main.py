@@ -3,9 +3,8 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 
-# Импортируем ВСЕ нужные модели из database (включая Pizzeria)
+# Импортируем ВСЕ нужные модели из database
 from database import init_db, SessionLocal, User, Pizza, Pizzeria, Order
-
 
 app = FastAPI()
 
@@ -37,7 +36,7 @@ if not pizza_exists:
     menu = [
         Pizza(
             title="Маргарита",
-            description="Классический рецепт: итальянские томаты, нежнейшая моцарелла и свежий базилик.",
+            description="Классический рецепт: italian томаты, нежнейшая моцарелла и свежий базилик.",
             price=450,
             image_url="https://static.vecteezy.com/system/resources/previews/046/828/708/non_2x/fresh-classic-pizza-margarita-top-view-isolated-on-transparent-background-png.png",
         ),
@@ -118,27 +117,54 @@ def register_handle(username: str = Form(...), password: str = Form(...), db: Se
     return RedirectResponse(url="/login", status_code=303)
 
 
-# ОБРАБОТКА ВХОДА: Теперь с выводом реального количества курьеров в админку!
+# ОБРАБОТКА ВХОДА С ВЫВОДОМ ИСТОРИИ ЗАКАЗОВ КЛИЕНТА
 @app.post("/login", response_class=HTMLResponse)
 def login_handle(username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == username).first()
 
     if user and user.password == password:
         if user.is_admin:
-            # Вытаскиваем из базы данных информацию о центральном филиале
             center_branch = db.query(Pizzeria).filter(Pizzeria.name == "Филиал Центр").first()
-            
             with open("admin.html", "r", encoding="utf-8") as file:
                 admin_html = file.read()
-            
-            # Подставляем реальное количество курьеров в поля ввода на странице админа
             admin_html = admin_html.replace('value="3" min="0"', f'value="{center_branch.auto_couriers}" min="0"')
             admin_html = admin_html.replace('value="5" min="0"', f'value="{center_branch.foot_couriers}" min="0"')
-            
             return admin_html
         else:
+            # ЗДЕСЬ ДОБАВЛЕНА ДИНАМИЧЕСКАЯ ИСТОРИЯ ЗАКАЗОВ В ЛК КЛИЕНТА
+            user_orders = db.query(Order).filter(Order.user_id == 2).order_by(Order.id.desc()).all()
+            orders_html = ""
+            
+            if not user_orders:
+                orders_html = """
+                <div class="admin-card" style="text-align: center;">
+                    <p style="color: #5c5c5c;">Вы еще не сделали ни одного заказа. Самое время заказать горячую пиццу! 🍕</p>
+                </div>
+                """
+            else:
+                for order in user_orders:
+                    type_ru = "🚗 Доставка" if order.delivery_type == "delivery" else "🏃 Самовывоз"
+                    address_info = f"<p><b>Адрес:</b> {order.address}</p>" if order.delivery_type == "delivery" else ""
+                    
+                    orders_html += f"""
+                    <div class="admin-card" style="margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #f4f4f6; padding-bottom: 10px; margin-bottom: 15px;">
+                            <span>📦 <b>Заказ №{order.id}</b> ({type_ru})</span>
+                            <span style="color: #ff5c00; font-weight: bold;">{order.status}</span>
+                        </div>
+                        <p><b>Состав заказа:</b> {order.items}</p>
+                        {address_info}
+                        <div style="margin-top: 15px; font-weight: bold; font-size: 1.1rem; color: #000;">
+                            Итого: {order.total_price} ₽
+                        </div>
+                    </div>
+                    """
+            
             with open("cabinet.html", "r", encoding="utf-8") as file:
-                return file.read()
+                cabinet_html = file.read()
+                
+            dynamic_cabinet = cabinet_html.replace("<!-- ДИНАМИЧЕСКАЯ_ИСТОРИЯ_ЗАКАЗОВ -->", orders_html)
+            return dynamic_cabinet
     else:
         return """
         <html>
@@ -149,18 +175,15 @@ def login_handle(username: str = Form(...), password: str = Form(...), db: Sessi
             </body>
         </html>
         """
+
 # МАРШРУТ ОБНОВЛЕНИЯ КУРЬЕРОВ ИЗ АДМИНКИ
 @app.post("/admin/update-couriers")
 def update_couriers(auto_couriers: int = Form(...), foot_couriers: int = Form(...), db: Session = Depends(get_db)):
-    # Находим в базе данных наш центральный филиал
     branch = db.query(Pizzeria).filter(Pizzeria.name == "Филиал Центр").first()
     if branch:
-        # Меняем старые значения курьеров на новые из формы
         branch.auto_couriers = auto_couriers
         branch.foot_couriers = foot_couriers
-        db.commit() # Сохраняем изменения в базе данных!
-        
-    # Возвращаем админа обратно на страницу успешного уведомления
+        db.commit()
     return HTMLResponse("""
         <body style="text-align: center; padding-top: 50px; font-family: sans-serif;">
             <h2 style="color: green;">✅ Данные курьеров успешно обновлены в БД!</h2>
@@ -171,7 +194,6 @@ def update_couriers(auto_couriers: int = Form(...), foot_couriers: int = Form(..
 # МАРШРУТ ОБНОВЛЕНИЯ ЦЕН ИЗ АДМИНКИ
 @app.post("/admin/update-prices")
 def update_prices(price_margarita: int = Form(...), price_pepperoni: int = Form(...), db: Session = Depends(get_db)):
-    # Находим пиццы в базе данных по их названиям
     margarita = db.query(Pizza).filter(Pizza.title == "Маргарита").first()
     pepperoni = db.query(Pizza).filter(Pizza.title == "Пепперони").first()
     
@@ -179,9 +201,7 @@ def update_prices(price_margarita: int = Form(...), price_pepperoni: int = Form(
         margarita.price = price_margarita
     if pepperoni:
         pepperoni.price = price_pepperoni
-        
-    db.commit() # Сохраняем новые цены в базе данных!
-    
+    db.commit()
     return HTMLResponse("""
         <body style="text-align: center; padding-top: 50px; font-family: sans-serif;">
             <h2 style="color: green;">✅ Новые цены успешно сохранены в базе данных!</h2>
@@ -195,20 +215,17 @@ def create_order(
     items: str = Form(...), 
     total_price: int = Form(...), 
     delivery_type: str = Form(...), 
-    address: str = Form("") , 
+    address: str = Form(""), 
     db: Session = Depends(get_db)
 ):
-    # Создаем новую запись заказа в базе данных
     new_order = Order(
-        user_id=2, # Временная заглушка ID клиента для теста
+        user_id=2, 
         items=items,
         total_price=total_price,
         delivery_type=delivery_type,
         address=address,
-        status="Принят рестораном №1" # Стартовый статус для трекера
+        status="Принят рестораном №1"
     )
     db.add(new_order)
-    db.commit() # Сохраняем в pizza.db
-    
+    db.commit()
     return {"status": "success", "message": "Заказ успешно сохранен в базе данных!"}
-
