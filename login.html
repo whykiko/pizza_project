@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Вход — KikoПицца</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <div class="logo"><a href="/" style="color: #ff5c00; text-decoration: none;">KikoПицца</a></div>
+    </header>
+    
+    <div class="login-container">
+        <h2>Вход в аккаунт</h2>
+        <!-- Форма, которая будет отправлять данные на наш бэкенд Python -->
+        <form action="/login" method="POST">
+            <div class="form-group">
+                <label for="username">Логин:</label>
+                <input type="text" id="username" name="username" required placeholder="Введите логин">
+            </div>
+            <div class="form-group">
+                <label for="password">Пароль:</label>
+                <input type="password" id="password" name="password" required placeholder="Введите пароль">
+            </div>
+            <button type="submit" class="login-btn">Войти</button>
+        </form>
+    </div>
+</body>
+</html>

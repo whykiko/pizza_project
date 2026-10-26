@@ -112,3 +112,51 @@ button:hover {
     background-color: #2b2b2a;
     color: white;
 }
+/* Контейнер формы входа */
+.login-container {
+    max-width: 400px;
+    margin: 80px auto;
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+}
+
+.login-container h2 {
+    margin-top: 0;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+/* Группы полей ввода */
+.form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.form-group input {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+/* Синяя или оранжевая подсветка при клике на поле ввода */
+.form-group input:focus {
+    border-color: #ff5c00;
+}
+
+/* Кнопка войти на всю ширину */
+.login-btn {
+    width: 100%;
+    margin-top: 10px;
+}
