@@ -41,14 +41,14 @@ if not pizza_exists:
         Pizza(
             title="Маргарита",
             description="Классический рецепт: итальянские томаты, нежнейшая моцарелла и свежий базилик.",
-            price=450,
+            price=999,
             image_url="https://static.vecteezy.com/system/resources/previews/046/828/708/non_2x/fresh-classic-pizza-margarita-top-view-isolated-on-transparent-background-png.png",
         ),
         Pizza(
             title="Пепперони",
             description="Пикантная колбаска пепперони, увеличенная порция сыра моцарелла и фирменный томатный соус.",
             price=550,
-            image_url="https://static.vecteezy.com/system/resources/previews/049/668/532/non_2x/delicious-pepperoni-pizza-with-melted-cheese-and-a-transparent-background-png.png",
+            image_url="https://avatars.mds.yandex.net/i?id=83b841fbf011ca3dee4089e5099b33ff_l-12609276-images-thumbs&n=13",
         ),
     ]
     db.add_all(menu)
